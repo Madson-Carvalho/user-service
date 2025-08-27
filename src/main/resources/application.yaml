@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: user-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/bookWisedb
+    username: user
+    password: 312319
+    jpa:
+      hibernate:
+        ddl-auto: update
+      show-sql: true
+      properties:
+        hibernate.format_sql: true
+    rabbitmq:
+      host: rabbitmq
+      port: 15672
+      username: guest
+      password: guest
+
+jwt:
+  secret: ${JWT_SECRET:changeme}
+  expiration: 3600
+  refresh: 86400
