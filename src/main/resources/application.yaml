@@ -1,23 +1,71 @@
+server:
+  servlet:
+    context-path: /api/v1
+
 spring:
   application:
     name: user-service
+
   datasource:
     url: jdbc:postgresql://localhost:5432/bookWisedb
     username: user
     password: 312319
-    jpa:
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
       hibernate:
-        ddl-auto: update
-      show-sql: true
-      properties:
-        hibernate.format_sql: true
-    rabbitmq:
-      host: rabbitmq
-      port: 15672
-      username: guest
-      password: guest
+        format_sql: true
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    connection-timeout: 5000
+    template:
+      retry:
+        enabled: true
+        initial-interval: 1000ms
+        max-attempts: 3
+        max-interval: 10000ms
+        multiplier: 2.0
+    listener:
+      simple:
+        default-requeue-rejected: false
+        acknowledge-mode: auto
+        prefetch: 10
+    ssl:
+      enabled: ${RABBITMQ_SSL_ENABLED:false}
+    virtual-host: ${RABBITMQ_VHOST:/}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,rabbit
+  endpoint:
+    health:
+      show-details: when_authorized
+      show-components: when_authorized
+      group:
+        readiness:
+          include: db,rabbit
+        liveness:
+          include: ping
+  health:
+    rabbit:
+      enabled: true
+    db:
+      enabled: true
 
 jwt:
-  secret: ${JWT_SECRET:changeme}
-  expiration: 3600
-  refresh: 86400
+  secret-key: ${JWT_SECRET:yrnt4BE6yc21XfQidT6ooRvjzzif2k0CdCdPiX4Qors9XhREarz0nq4nHh8tUwsO}
+  access-token-expiration-ms: 3600000     # 15 minutos
+  refresh-token-expiration-ms: 604800000   # 7 dias
+  password-reset-token-expiration-ms: 3600000  # 1 hora
+  email-verification-token-expiration-ms: 86400000  # 24 horas
+  token-header: Authorization
+  token-prefix: "Bearer "
+  max-devices-per-user: 5
